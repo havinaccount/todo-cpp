@@ -1,5 +1,4 @@
-#ifndef LOGIC_HPP
-#define LOGIC_HPP
+#pragma once
 
 #include <optional>
 #include <string>
@@ -9,5 +8,3 @@ namespace tasks {
 [[nodiscard]] bool save_tasks(const std::vector<std::string>& vec);
 [[nodiscard]] std::optional<std::vector<std::string>> load_tasks();
 }  // namespace tasks
-
-#endif

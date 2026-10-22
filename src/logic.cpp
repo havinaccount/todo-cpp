@@ -14,10 +14,7 @@ namespace tasks {
 [[nodiscard]] bool save_tasks(const std::vector<std::string>& vec) {
   std::ofstream file{"tasks.txt", std::ios::trunc};
 
-  if (!file) {
-    std::cerr << "Error: could not open tasks.txt.\n";
-    return false;
-  }
+  if (!file) return false;
 
   for (const std::string& curr_task : vec) {
     file << curr_task << '\n';
@@ -25,10 +22,7 @@ namespace tasks {
 
   file.close();
 
-  if (!file) {
-    std::cerr << "Error: failed to write tasks.txt.\n";
-    return false;
-  }
+  if (!file) return false;
 
   return true;
 }
@@ -38,7 +32,7 @@ namespace tasks {
     if (!fs::exists("tasks.txt")) {
       return std::vector<std::string>{};
     }
-  } catch (const fs::filesystem_error&) {
+  } catch ([[maybe_unused]] const fs::filesystem_error& e) {
     return std::nullopt;
   }
 
