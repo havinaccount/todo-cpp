@@ -4,13 +4,15 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
+
 namespace fs = std::filesystem;
 
 namespace tasks {
 [[nodiscard]] bool save_tasks(const std::vector<std::string>& vec) {
-  std::ofstream file{"tasks.txt", std::ios::app};
+  std::ofstream file{"tasks.txt", std::ios::trunc};
 
   if (!file) {
     std::cerr << "Error: could not open tasks.txt.\n";
@@ -21,24 +23,29 @@ namespace tasks {
     file << curr_task << '\n';
   }
 
+  file.close();
+
+  if (!file) {
+    std::cerr << "Error: failed to write tasks.txt.\n";
+    return false;
+  }
+
   return true;
 }
 
-[[nodiscard]] std::vector<std::string> load_tasks() {
+[[nodiscard]] std::optional<std::vector<std::string>> load_tasks() {
   try {
     if (!fs::exists("tasks.txt")) {
-      return {};
+      return std::vector<std::string>{};
     }
-  } catch (const fs::filesystem_error& e) {
-    std::cerr << "Filesystem error: " << e.what() << '\n';
-    return {};
+  } catch (const fs::filesystem_error&) {
+    return std::nullopt;
   }
 
   std::ifstream file{"tasks.txt"};
 
   if (!file) {
-    std::cerr << "Error: could not open tasks.txt.\n";
-    return {};
+    return std::nullopt;
   }
 
   std::vector<std::string> tmp{};
@@ -49,8 +56,7 @@ namespace tasks {
   }
 
   if (file.bad()) {
-    std::cerr << "Error: failed to read tasks.txt.\n";
-    return {};
+    return std::nullopt;
   }
 
   return tmp;

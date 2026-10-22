@@ -1,5 +1,16 @@
-cmake-build-debug/
-cmake-build-release
-.qtcreator/
-build/
-.idea/
+# Build output
+/build/
+/cmake-build-*/
+
+# Generated compilation database
+/compile_commands.json
+
+# Clang tooling cache
+/.cache/
+
+# IDE state
+/.idea/
+/.qtcreator/
+
+# Local task data
+/tasks.txt

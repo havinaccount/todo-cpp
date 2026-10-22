@@ -75,20 +75,26 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "logic.hpp"
 
 int main() {
   std::string command{};
-  std::vector<std::string> tasks = tasks::load_tasks();
+  auto tasks = tasks::load_tasks();
+
+  if (!tasks) {
+    std::cout << "Failed to load the tasks.\n";
+    return 1;
+  }
+
+  std::vector<std::string> list_tasks = std::move(tasks.value());
 
   while (true) {
     std::cout << "Enter a command: ";
 
-    if (!std::getline(std::cin, command)) {
-      break;
-    }
+    if (!std::getline(std::cin, command)) break;
 
     if (command == "add") {
       std::string task{};
@@ -96,24 +102,30 @@ int main() {
 
       if (!std::getline(std::cin, task)) break;
 
-      tasks.push_back(task);
-      if (!tasks::save_tasks(tasks)) {
+      std::vector<std::string> tmp = list_tasks;
+
+      tmp.push_back(task);
+
+      if (!tasks::save_tasks(tmp)) {
 	std::cout << "Failed to add the task.\n";
 	continue;
       }
+
+      list_tasks = std::move(tmp);
+
       std::cout << "Task added!\n";
     } else if (command == "quit" || command == "q") {
       std::cout << "\nExiting...\n";
       break;
     } else if (command == "list") {
-      if (tasks.empty()) {
+      if (list_tasks.empty()) {
 	std::cout << "Still no tasks...\n";
 	continue;
       }
 
-      for (std::size_t i = 0; i < tasks.size(); ++i) {
-	std::cout << (i + 1) << ". " << tasks[i] << '\n';
-      }
+      for (std::size_t i = 0; i < list_tasks.size(); ++i)
+	std::cout << (i + 1) << ". " << list_tasks[i] << '\n';
+
       std::cout << '\n';
     } else if (command == "remove") {
       int request{};
@@ -134,16 +146,20 @@ int main() {
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
       if (!(request >= 1 &&
-	    static_cast<std::size_t>(request) <= tasks.size())) {
+	    static_cast<std::size_t>(request) <= list_tasks.size())) {
 	std::cout << "Invalid task, try again.\n";
 	continue;
       }
 
-      tasks.erase(tasks.begin() + (request - 1));
-      if (!tasks::save_tasks(tasks)) {
+      auto tmp = list_tasks;
+
+      tmp.erase(tmp.begin() + (request - 1));
+      if (!tasks::save_tasks(tmp)) {
 	std::cout << "Failed to save the task.\n";
-	break;
+	continue;
       }
+
+      list_tasks = std::move(tmp);
       std::cout << "Task removed!\n";
     } else {
       std::cout << "Invalid choice, try again.\n";
