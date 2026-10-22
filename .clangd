@@ -1,8 +1,0 @@
-CompileFlags:
-	Add:
-		- -Wall
-		- -Wextra
-		- -Wpedantic
-		- -Wconversion
-		- -Wshadow
-		- -Wformat=2
